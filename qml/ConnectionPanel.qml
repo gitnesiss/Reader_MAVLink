@@ -234,5 +234,28 @@ Rectangle {
                 console.log("Requested ATTITUDE data stream")
             }
         }
+
+        Button {
+            Layout.fillWidth: true
+            text: "Force 30Hz Stream"
+            font.pixelSize: 14
+
+            background: Rectangle {
+                color: parent.down ? "#e67e22" : "#d35400"
+                radius: 5
+            }
+            contentItem: Text {
+                text: parent.text
+                font: parent.font
+                color: "white"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            onClicked: {
+                mavlinkHandler.requestAttitudeStream()
+                console.log("Forced 30Hz attitude stream request")
+            }
+        }
     }
 }

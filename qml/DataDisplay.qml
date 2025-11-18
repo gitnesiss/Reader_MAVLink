@@ -22,10 +22,11 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        // Attitude display
+        // В секции Attitude display, добавим диагностическую информацию:
+
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 160  // Увеличили высоту для нового поля
+            Layout.preferredHeight: 180 // Увеличим высоту
             color: "#2c3e50"
             radius: 6
             border.color: "#7f8c8d"
@@ -75,11 +76,46 @@ Rectangle {
                         font.pixelSize: 14; color: "#bdc3c7"
                     }
 
-                    // НОВОЕ: Отображение частоты
                     Text { text: "Frequency:"; font.pixelSize: 14; color: "white"; Layout.alignment: Qt.AlignRight }
                     Text {
-                        text: mavlinkHandler.attitudeFrequency + " Hz"
-                        font.pixelSize: 14; font.bold: true; color: "#9b59b6"
+                        text: {
+                            var freq = mavlinkHandler.attitudeFrequency
+                            if (freq >= 25) return "✓ " + freq + " Hz"
+                            else if (freq >= 15) return "⚠ " + freq + " Hz"
+                            else return "❌ " + freq + " Hz"
+                        }
+                        font.pixelSize: 14;
+                        font.bold: true;
+                        color: {
+                            var freq = mavlinkHandler.attitudeFrequency
+                            if (freq >= 25) return "#2ecc71"
+                            else if (freq >= 15) return "#f39c12"
+                            else return "#e74c3c"
+                        }
+                    }
+
+                    // Добавим диагностику
+                    Text { text: "Status:"; font.pixelSize: 14; color: "white"; Layout.alignment: Qt.AlignRight }
+                    Text {
+                        text: {
+                            if (!mavlinkHandler.connected) return "Disconnected"
+                            var freq = mavlinkHandler.attitudeFrequency
+                            if (freq === 0) return "No data"
+                            else if (freq < 10) return "Very low"
+                            else if (freq < 20) return "Low"
+                            else if (freq < 25) return "Moderate"
+                            else return "Good"
+                        }
+                        font.pixelSize: 14;
+                        color: {
+                            if (!mavlinkHandler.connected) return "#e74c3c"
+                            var freq = mavlinkHandler.attitudeFrequency
+                            if (freq === 0) return "#e74c3c"
+                            else if (freq < 10) return "#e74c3c"
+                            else if (freq < 20) return "#f39c12"
+                            else if (freq < 25) return "#f1c40f"
+                            else return "#2ecc71"
+                        }
                     }
                 }
             }

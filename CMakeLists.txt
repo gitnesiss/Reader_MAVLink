@@ -41,6 +41,7 @@ qt_add_resources(appMavlinkReader "qml"
         qml/Main.qml
         qml/ConnectionPanel.qml
         qml/DataDisplay.qml
+        qml/ParameterPanel.qml
 )
 
 # Ресурсы изображений (если будут использоваться)
@@ -67,6 +68,7 @@ qt_add_qml_module(appMavlinkReader
         qml/Main.qml
         qml/ConnectionPanel.qml
         qml/DataDisplay.qml
+        qml/ParameterPanel.qml
 )
 
 target_link_libraries(appMavlinkReader
