@@ -25,7 +25,7 @@ Rectangle {
         // Attitude display
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            Layout.preferredHeight: 160  // Увеличили высоту для нового поля
             color: "#2c3e50"
             radius: 6
             border.color: "#7f8c8d"
@@ -73,6 +73,13 @@ Rectangle {
                     Text {
                         text: mavlinkHandler.attitude.timestamp + " ms"
                         font.pixelSize: 14; color: "#bdc3c7"
+                    }
+
+                    // НОВОЕ: Отображение частоты
+                    Text { text: "Frequency:"; font.pixelSize: 14; color: "white"; Layout.alignment: Qt.AlignRight }
+                    Text {
+                        text: mavlinkHandler.attitudeFrequency + " Hz"
+                        font.pixelSize: 14; font.bold: true; color: "#9b59b6"
                     }
                 }
             }
@@ -166,6 +173,11 @@ Rectangle {
 
             // Auto-scroll to bottom
             messageLog.cursorPosition = messageLog.text.length;
+        }
+
+        function onAttitudeFrequencyChanged(frequency) {
+            // Можно добавить дополнительную логику при изменении частоты
+            console.log("Attitude frequency changed to:", frequency + "Hz");
         }
     }
 }

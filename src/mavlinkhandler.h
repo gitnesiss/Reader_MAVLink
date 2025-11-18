@@ -34,17 +34,18 @@ public:
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
     Q_PROPERTY(MavlinkAttitude attitude READ attitude NOTIFY attitudeChanged)
     Q_PROPERTY(QString rawData READ rawData NOTIFY rawDataChanged)
+    Q_PROPERTY(int attitudeFrequency READ attitudeFrequency NOTIFY attitudeFrequencyChanged) // НОВОЕ СВОЙСТВО
 
     bool connected() const;
     QString status() const;
     MavlinkAttitude attitude() const;
     QString rawData() const;
+    int attitudeFrequency() const; // НОВЫЙ МЕТОД
 
 public slots:
     void connectToFC(const QString &ip, int port = 5760);
     void disconnectFromFC();
     void clearData();
-
     void requestAttitudeStream();
 
 signals:
@@ -53,11 +54,13 @@ signals:
     void attitudeChanged(const MavlinkAttitude &attitude);
     void rawDataChanged(const QString &rawData);
     void newMessage(const QString &message);
+    void attitudeFrequencyChanged(int frequency); // НОВЫЙ СИГНАЛ
 
 private slots:
     void onNetworkDataReceived(const QByteArray &data);
     void onNetworkConnectedChanged(bool connected);
     void onNetworkStatusChanged(const QString &status);
+    void updateFrequency(); // НОВЫЙ СЛОТ
 
 private:
     void parseMavlinkMessage(const QByteArray &data);
@@ -67,6 +70,12 @@ private:
     MavlinkAttitude m_currentAttitude;
     QString m_rawData;
     QByteArray m_buffer;
+
+    // Для подсчета частоты
+    QTimer *m_frequencyTimer;
+    int m_attitudeCount;
+    int m_attitudeFrequency;
+    qint64 m_lastAttitudeTime;
 };
 
 #endif // MAVLINKHANDLER_H

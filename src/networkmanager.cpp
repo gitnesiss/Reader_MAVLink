@@ -14,20 +14,7 @@ NetworkManager::NetworkManager(QObject *parent)
     connect(m_socket, &QUdpSocket::readyRead, this, &NetworkManager::onReadyRead);
     connect(m_heartbeatTimer, &QTimer::timeout, this, &NetworkManager::sendMavlinkHeartbeat);
 
-    // Слушаем на всех интерфейсах, порт 14550
-    if (m_socket->bind(QHostAddress::Any, 14550)) {
-        qDebug() << "✅ Listening on UDP port 14550";
-    } else {
-        qDebug() << "❌ Failed to bind to port 14550:" << m_socket->errorString();
-    }
-
-    // Также пробуем привязаться к порту 14551 на случай если контроллер отправляет туда
-    QUdpSocket* secondarySocket = new QUdpSocket(this);
-    if (secondarySocket->bind(QHostAddress::Any, 14551)) {
-        connect(secondarySocket, &QUdpSocket::readyRead, this, &NetworkManager::onReadyRead);
-        qDebug() << "✅ Also listening on UDP port 14551";
-    }
-
+    // НЕ слушаем порты при старте - только после подключения
     m_heartbeatTimer->setInterval(1000);
 }
 
@@ -58,22 +45,20 @@ void NetworkManager::connectToFC(const QString &ip, int port)
     m_remoteAddress = QHostAddress(ip);
     m_remotePort = port;
 
-    // Для UDP мы просто "подключаемся", начиная слушать порт
-    if (m_socket->state() != QAbstractSocket::BoundState) {
-        if (!m_socket->bind(QHostAddress::Any, 14550)) {
-            m_status = "UDP bind failed: " + m_socket->errorString();
-            emit statusChanged(m_status);
-            return;
-        }
+    // Биндим сокет только при подключении
+    if (m_socket->bind(QHostAddress::Any, 14550)) {
+        m_connected = true;
+        m_status = QString("UDP connected to %1:%2").arg(ip).arg(port);
+        emit connectedChanged(m_connected);
+        emit statusChanged(m_status);
+
+        m_heartbeatTimer->start();
+        qDebug() << "UDP connected to" << ip << ":" << port;
+    } else {
+        m_status = "Bind failed: " + m_socket->errorString();
+        emit statusChanged(m_status);
+        emit errorOccurred(m_socket->errorString());
     }
-
-    m_connected = true;
-    m_status = QString("UDP connected to %1:%2").arg(ip).arg(port);
-    emit connectedChanged(m_connected);
-    emit statusChanged(m_status);
-
-    m_heartbeatTimer->start();
-    qDebug() << "UDP connected to" << ip << ":" << port;
 }
 
 void NetworkManager::disconnectFromFC()
